@@ -1,0 +1,8 @@
+---
+# defaults file for ansible-role-vim
+
+role_vim_enabled: no
+
+vim_plugins_github: []
+vim_use_pathogen: yes
+

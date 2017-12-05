@@ -1,0 +1,6 @@
+---
+# handlers file for ansible-role-vim
+
+- name: update vim helptags
+  shell: vim +Helptags +:q
+

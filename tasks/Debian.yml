@@ -1,0 +1,22 @@
+---
+# tasks vim Debian
+
+- block:
+  - name: Install
+    apt:
+      name: vim
+      state: present
+
+  - name: Set as default editor
+    alternatives: name=editor path=/usr/bin/vim.basic
+
+  - name: Configure global
+    template:
+      src: vimrc.local.j2
+      dest: /etc/vim/vimrc.local
+      owner: root
+      group: root
+      mode: 0644
+
+  become: true
+

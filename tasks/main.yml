@@ -1,0 +1,62 @@
+---
+# tasks file for ansible-role-vim
+
+- block:
+
+  - include_tasks: "{{ ansible_os_family}}.yml"
+    tags: vim
+
+  - name: Ensure local config file
+    copy:
+      dest: "{{ ansible_env.HOME }}/.vimrc"
+      content: ""
+      force: no
+      mode: 0644
+    tags: vim
+
+  - name: Ensure vim autoload directory
+    file:
+      dest: "{{ ansible_env.HOME }}/.vim/autoload/"
+      state: directory
+      mode: 0755
+
+  - name: Check for pathogen
+    stat:
+      path: "{{ ansible_env.HOME }}/.vim/autoload/pathogen.vim"
+    register: result_pathogen
+    when:
+      - vim_use_pathogen
+    tags: vim
+
+  - name: Ensure pathogen
+    get_url:
+      url: https://tpo.pe/pathogen.vim
+      dest: "{{ ansible_env.HOME }}/.vim/autoload/pathogen.vim"
+      mode: 0644
+    when:
+      - vim_use_pathogen
+      - result_pathogen.stat.exists == false
+    tags: vim
+
+  - name: Enable pathogen
+    lineinfile:
+      dest: "{{ ansible_env.HOME }}/.vimrc"
+      regexp: "^execute pathogen"
+      line: "execute pathogen#infect()"
+    when: vim_use_pathogen
+    tags: vim
+
+  - name: Install plugins from github
+    git:
+      repo: "https://github.com/{{ item.user }}/{{ item.repo }}.git"
+      dest: "{{ ansible_env.HOME }}/.vim/bundle/{{ item.repo }}"
+      force: yes
+    notify: update vim helptags
+    with_items:
+      - "{{ vim_plugins_github }}"
+    tags: vim
+
+  when: role_vim_enabled
+
+# vim: ai ts=2 sts=2 sw=2
+
